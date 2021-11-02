@@ -25,6 +25,7 @@ class CourseMetadataSerializer(serializers.Serializer):  # pylint: disable=abstr
             'number',
             'courseId',
         ]
+        read_only_fields = fields
 
 
 class OpenResponseMetadataSerializer(serializers.Serializer):  # pylint: disable=abstract-method
@@ -44,6 +45,7 @@ class OpenResponseMetadataSerializer(serializers.Serializer):  # pylint: disable
             'prompts',
             'type',
         ]
+        read_only_fields = fields
 
 
 class ScoreSerializer(serializers.Serializer):  # pylint: disable=abstract-method
@@ -55,6 +57,7 @@ class ScoreSerializer(serializers.Serializer):  # pylint: disable=abstract-metho
 
     class Meta:
         fields = ['pointsEarned', 'pointsPossible']
+        read_only_fields = fields
 
     def to_representation(self, instance):
         """ An empty dict should return None instead """
@@ -89,6 +92,7 @@ class SubmissionMetadataSerializer(serializers.Serializer):  # pylint: disable=a
             'lockStatus',
             'score'
         ]
+        read_only_fields = fields
 
 
 class InitializeSerializer(serializers.Serializer):
@@ -107,3 +111,4 @@ class InitializeSerializer(serializers.Serializer):
             'submissions',
             'rubricConfig',
         ]
+        read_only_fields = fields
