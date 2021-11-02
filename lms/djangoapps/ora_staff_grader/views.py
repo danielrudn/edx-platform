@@ -14,7 +14,7 @@ from xmodule.modulestore.django import modulestore
 from xmodule.modulestore.exceptions import ItemNotFoundError
 
 from lms.djangoapps.ora_staff_grader.serializers import InitializeSerializer
-from lms.djangoapps.ora_staff_grader.utils import call_xblock_json_handler
+from lms.djangoapps.ora_staff_grader.utils import call_xblock_json_handler, require_params
 from openedx.core.djangoapps.content.course_overviews.api import get_course_overview_or_none
 from openedx.core.lib.api.authentication import BearerAuthenticationAllowInactiveUser
 
@@ -27,14 +27,13 @@ class InitializeView(RetrieveAPIView):
         courseMetadata
         oraMetadata
         submissions
+        rubricConfig
     }
 
     Returns:
-        200
-        400
-        403
-        404
-        405
+    - 200 on success
+    - 400 for invalid/missing ora_location
+    - 403 for invalid access/credentials
     """
     authentication_classes = (
         JwtAuthentication,
@@ -43,12 +42,8 @@ class InitializeView(RetrieveAPIView):
     )
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request, *args, **kwargs):
-        ora_location = request.query_params.get('ora_location')
-
-        if not ora_location:
-            return HttpResponseBadRequest(_("Query must contain an ora_location param."))
-
+    @require_params(['ora_location'])
+    def get(self, request, ora_location, *args, **kwargs):
         response_data = {}
 
         # Get ORA block
@@ -56,7 +51,7 @@ class InitializeView(RetrieveAPIView):
             ora_usage_key = UsageKey.from_string(ora_location)
             response_data['oraMetadata'] = modulestore().get_item(ora_usage_key)
         except (InvalidKeyError, ItemNotFoundError):
-            return HttpResponseNotFound(_("Invalid ora_location."))
+            return HttpResponseBadRequest(_("Invalid ora_location."))
 
         # Get course metadata
         course_id = str(ora_usage_key.course_key)

@@ -48,14 +48,14 @@ class TestInitializeView(SharedModuleStoreTestCase, APITestCase):
         response = self.client.get(self.api_url)
 
         assert response.status_code == 400
-        assert response.content.decode() == "Query must contain an ora_location param."
+        assert response.content.decode() == "Query requires the following query params: ora_location"
 
     def test_bad_ora_location(self):
-        """ Bad ORA location should return a 404 and error message """
+        """ Bad ORA location should return a 400 and error message """
         self.client.login(username=self.staff.username, password=self.password)
         response = self.client.get(self.api_url, {'ora_location': 'not_a_real_location'})
 
-        assert response.status_code == 404
+        assert response.status_code == 400
         assert response.content.decode() == "Invalid ora_location."
 
     @patch('lms.djangoapps.ora_staff_grader.views.InitializeView.get_rubric_config')
