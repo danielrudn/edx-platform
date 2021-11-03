@@ -112,3 +112,16 @@ class InitializeSerializer(serializers.Serializer):
             'rubricConfig',
         ]
         read_only_fields = fields
+
+
+class LockStatusSerializer(serializers.Serializer):
+    """
+    Info about the status of a submission lock, with extra metadata stripped out.
+    """
+    lockStatus = serializers.CharField(source='lock_status')
+
+    class Meta:
+        fields = [
+            'lockStatus'
+        ]
+        read_only_fields = fields
