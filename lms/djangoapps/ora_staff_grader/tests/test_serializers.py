@@ -7,6 +7,7 @@ from unittest.mock import Mock
 from lms.djangoapps.ora_staff_grader.serializers import (
     CourseMetadataSerializer,
     InitializeSerializer,
+    LockStatusSerializer,
     OpenResponseMetadataSerializer,
     SubmissionMetadataSerializer,
 )
@@ -255,3 +256,47 @@ class TestInitializeSerializer(TestCase):
         assert output_data['oraMetadata'] == OpenResponseMetadataSerializer(self.mock_ora_instance).data
         assert output_data['submissions'] == self.mock_submissions_data
         assert output_data['rubricConfig'] == self.mock_rubric_data
+
+
+class TestLockStatusSerializer(SharedModuleStoreTestCase):
+    """
+    Tests for CourseMetadataSerializer
+    """
+    lock_contested = {
+        "error": "Submission already locked"
+    }
+
+    lock_in_progress = {
+        "submission_uuid": "e34ef789-a4b1-48cf-b1bc-b3edacfd4eb2",
+        "owner_id": "10ab03f1b75b4f9d9ab13a1fd1dccca1",
+        "created_at": "2021-09-21T21:54:09.901221Z",
+        "lock_status": "in-progress",
+    }
+
+    lock_in_progress_expected = {
+        "lockStatus": "in-progress"
+    }
+
+    lock_owned_by_other_user = {
+        "submission_uuid": "e34ef789-a4b1-48cf-b1bc-b3edacfd4eb2",
+        "owner_id": "10ab03f1b75b4f9d9ab13a1fd1dccca1",
+        "created_at": "2021-09-21T21:54:09.901221Z",
+        "lock_status": "locked",
+    }
+
+    lock_owned_by_other_user_expected = {
+        "lockStatus": "locked"
+    }
+
+    course_id = "course-v1:Oxford+TT101+2054"
+
+    def setUp(self):
+        super().setUp()
+
+    def test_happy_path(self):
+        """ For simple cases, lock status is passed through directly """
+        data = LockStatusSerializer(self.lock_in_progress).data
+        assert data == self.lock_in_progress_expected
+
+        data = LockStatusSerializer(self.lock_owned_by_other_user).data
+        assert data == self.lock_owned_by_other_user_expected
